@@ -534,3 +534,20 @@ class Model():
                 game.drop_r = True
         print("rest end")
         return '', 200
+
+    def serialize(self):
+        if self.game is None:
+            raise RuntimeError("游戏未初始化")
+        game: Game = self.game
+        return {
+            "game": game.serialize(),
+            "rules": self.rules,
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        self = cls()
+        self.game = Game.from_dict(data["game"])
+        self.rules = data["rules"]
+        self.board = self.game.board
+        return self

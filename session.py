@@ -12,6 +12,8 @@ from flask.typing import ResponseReturnValue, RouteCallable
 from flask import make_response, request
 import orjson
 
+from minesweepervariants.impl.summon.game import GameSession
+
 from .config import QUEUE_SIZE
 from .model import Model
 from .datastore import DataStore
@@ -92,6 +94,8 @@ class SessionManager:
 
         self.host: Model| None = None
 
+        self.dual_mode = False
+
     def get(self, token: str):
         if token in self.data:
             return self.data[token]
@@ -156,6 +160,8 @@ class SessionManager:
 
     def gen_token_route(self) -> RouteCallable:
         async def _func() -> ResponseReturnValue:
+            if self.dual_mode:
+                return 'Forbidden', 403
             token, _ = await self.create()
             return {"token": token, "success": True}
         return _func
@@ -178,3 +184,43 @@ class SessionManager:
             else:
                 return 'Bad Request', 400
         return _func
+
+    def gen_host_dual(self) -> RouteCallable:
+        async def _func() -> ResponseReturnValue:
+            token = request.args.get("token")
+
+            if token is None or not (data := self.get(token)):
+                return 'Unauthorized', 401
+
+            if self.host is None:
+                return 'Not Found', 404
+
+            if data["game"] is not self.host:
+                return 'Forbidden', 403
+
+            self.dual_mode = True
+
+            return {"success": True}, 200
+        return _func
+
+    async def dual_register(self) -> ResponseReturnValue:
+        if not self.dual_mode:
+            return 'Forbidden', 403
+
+        token = request.args.get("token")
+
+        if token is not None:
+            return 'Forbidden', 403
+
+        if self.host is None:
+            return 'Not Found', 404
+
+        token = await self.new_token()
+        if not (data := self.get(token)):
+            raise RuntimeError("Session data not found")
+        data["dual_mode"] = True
+
+        serialized = self.host.serialize()
+        GameSession.from_dict(serialized)
+
+        return {"success": True, "data": serialized, "token": token}, 200
