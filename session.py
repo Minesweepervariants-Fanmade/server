@@ -95,6 +95,7 @@ class SessionManager:
         self.host: Model| None = None
 
         self.dual_mode = False
+        self.dual_connect_mode = False
 
     def get(self, token: str):
         if token in self.data:
@@ -160,7 +161,7 @@ class SessionManager:
 
     def gen_token_route(self) -> RouteCallable:
         async def _func() -> ResponseReturnValue:
-            if self.dual_mode:
+            if self.dual_mode or self.dual_connect_mode:
                 return 'Forbidden', 403
             token, _ = await self.create()
             return {"token": token, "success": True}
@@ -221,6 +222,32 @@ class SessionManager:
         data["dual_mode"] = True
 
         serialized = self.host.serialize()
-        GameSession.from_dict(serialized)
 
         return {"success": True, "data": serialized, "token": token}, 200
+
+    async def dual_connect(self) -> ResponseReturnValue:
+        import requests
+        target = request.args.get("target")
+
+        if not target:
+            return 'Bad Request', 400
+
+        result = requests.get(f"http://{target}/api/dual_register")
+        if result.status_code != 200:
+            return 'Bad Gateway', 502
+
+        data = result.json()
+
+        game = self.model.from_dict(data["data"])
+
+        token = await self.new_token()
+        data = self.get(token)
+        if data is None:
+            raise RuntimeError("Session data not found")
+
+        data["game"] = game
+        self.host = game
+
+        self.dual_connect_mode = True
+
+        return {"success": True, "token": token}, 200

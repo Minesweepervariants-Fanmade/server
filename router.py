@@ -39,5 +39,6 @@ def create_app(sm: SessionManager, model: type[Model]) -> Flask:
     app.add_url_rule('/api/check', 'gen_check', sm.gen_check(), methods=['GET', 'POST'])
     app.add_url_rule('/api/host_dual', 'gen_host_dual', sm.gen_host_dual(), methods=['GET', 'POST'])
     app.add_url_rule('/api/dual_register', 'dual_register', sm.dual_register, methods=['GET', 'POST'])
+    app.add_url_rule('/api/dual_connect', 'dual_connect', sm.dual_connect, methods=['GET', 'POST'])
 
     return app
