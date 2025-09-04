@@ -2,6 +2,7 @@ import asyncio
 import ctypes
 from pyclbr import Function
 import queue
+import re
 import time
 import traceback
 from typing import Awaitable, Callable
@@ -25,16 +26,21 @@ class TaskQueue(queue.Queue):
         self.result = {}
         self.thread = None
         self.counter = 0
-        self.queueing = set()
+        self.queueing = {}
 
     def new_taskid(self):
         self.counter += 1
         taskid = self.counter
-        self.queueing.add(taskid)
+        self.queueing[taskid] = None
         return taskid
 
     def is_queueing(self, taskid):
         return taskid in self.queueing
+
+    def get_progress(self, taskid):
+        if (f := self.queueing.get(taskid, None)):
+            return f()
+        return None
 
     def put(self, item, block: bool = True, timeout: float | None = None) -> int:
         taskid = self.new_taskid()
@@ -47,14 +53,16 @@ class TaskQueue(queue.Queue):
     def get_result(self, taskid):
         if result := self.result.get(taskid, None):
             del self.result[taskid]
-            self.queueing.discard(taskid)
+            del self.queueing[taskid]
             return result
         return None
 
     def run(self):
         while True:
             item = self.get()
-            taskid, (func, *args) = item
+            taskid, (func, *args, progress_func) = item
+            if progress_func is not None and taskid in self.queueing:
+                self.queueing[taskid] = lambda: progress_func(*args)
             try:
                 result = func(*args)
                 if isinstance(result, Awaitable):
@@ -131,7 +139,7 @@ class SessionManager:
 
         return token, data
 
-    def gen_wrapper(self, needqueue: Callable[[Model], bool] = (lambda _: False)) -> Callable[[RouteCallable], RouteCallable]:
+    def gen_wrapper(self, needqueue: Callable[[Model], bool] = (lambda _: False), progress_func=None) -> Callable[[RouteCallable], RouteCallable]:
         def _wrapper(func: RouteCallable) -> RouteCallable:
             async def _func() -> ResponseReturnValue:
                 token = request.args.get("token")
@@ -147,7 +155,7 @@ class SessionManager:
                         json = None
 
                     if needqueue(data["game"]):
-                        taskid = data["tasks"].put_nowait((func, data["game"], request.args, json))
+                        taskid = data["tasks"].put_nowait((func, data["game"], request.args, json, progress_func))
                         return {'taskid': taskid, 'queueing': data["tasks"].qsize(), 'interval': 100}, 200
                     else:
                         result = func(data["game"], request.args, json)
@@ -176,9 +184,16 @@ class SessionManager:
                 return 'Unauthorized', 401
 
             if taskid is not None:
-                if result := data["tasks"].get_result(int(taskid)):
+                try:
+                    taskid = int(taskid)
+                except ValueError:
+                    return 'Bad Request', 400
+
+                if result := data["tasks"].get_result(taskid):
                     return result
-                elif (data["tasks"].is_queueing(int(taskid))):
+                elif (data["tasks"].is_queueing(taskid)):
+                    if progress := data["tasks"].get_progress(taskid):
+                        return {'progress': progress, 'interval': 100}, 202
                     return {'interval': 100}, 202
                 else:
                     return 'Not Found', 404

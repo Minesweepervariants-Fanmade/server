@@ -29,7 +29,7 @@ def create_app(sm: SessionManager, model: type[Model]) -> Flask:
     def root():
         return redirect(github_web)
 
-    app.add_url_rule('/api/new', 'generate_board', sm.gen_wrapper(lambda _: True)(model.generate_board), methods=['GET', 'POST'])
+    app.add_url_rule('/api/new', 'generate_board', sm.gen_wrapper(lambda _: True, lambda x,*_:x.game.create_schedule()[0])(model.generate_board), methods=['GET', 'POST'])
     app.add_url_rule('/api/metadata', 'metadata', sm.gen_wrapper()(model.metadata), methods=['GET', 'POST'])
     app.add_url_rule('/api/click', 'click', sm.gen_wrapper()(model.click), methods=['GET', 'POST'])
     app.add_url_rule('/api/hint', 'hint_post', sm.gen_wrapper(lambda m: m.game.last_hint[0] != m.game.board)(model.hint_post), methods=['GET', 'POST'])
