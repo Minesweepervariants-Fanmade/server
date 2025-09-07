@@ -179,7 +179,6 @@ def format_board(_board: AbstractBoard):
             "showLabel": _board.get_config(key, "row_col"),
             "showName": not _board.get_config(key, "row_col"),
         }
-        print(mask_list)
         if any(any(i) for i in mask_list):
             boards[key].update({
                 "mask": mask_list
