@@ -101,6 +101,7 @@ class CreateGameParams(TypedDict):
     rules: str
     mode: str
     total: str
+    diff: str
     u_mode: NotRequired[str]
     dye: NotRequired[str]
     mask: NotRequired[str]

@@ -78,6 +78,10 @@ class Model():
         dye = args.get("dye") or ""
         mask = args.get("mask") or ""
         seed = args.get("seed") or None
+        difficulty = args.get("diff") or "*,*"  # "*"表示不做限制 ","分割
+
+        parts = difficulty.split(',')
+        difficulty = [None if p.strip() == "*" else int(p.strip()) for p in parts]
 
         if seed is not None:
             get_random(new=True, seed=hash_str(seed))
@@ -142,7 +146,7 @@ class Model():
             mask_board = None
             __t = time.time()
             __count = 0
-            while __t + 9.5 > time.time():
+            while True:
                 __count += 1
                 answer_board = self.summon.summon_board()
                 if answer_board is None:
@@ -154,8 +158,44 @@ class Model():
                     get_random(new=True)
                     continue
                 self.board = mask_board.clone()
+                if (
+                    (
+                        difficulty[0] is not None and
+                        difficulty[0] > 1
+                    ) or (
+                        difficulty[1] is not None and
+                        difficulty[1] != float("inf")
+                    )
+                ):
+                    # 线索数检查
+                    self.game.drop_r = True
+                    clue_freq = self.game.check_difficulty()
+                    print("[new] clue map: ", clue_freq)
+                    max_clue = max(clue_freq.keys())
+                    if difficulty[1] is not None:
+                        # 检查其上限
+                        if max_clue > difficulty[1]:
+                            continue
+                    if difficulty[0] is not None:
+                        # 检查其下限
+                        if max_clue < difficulty[0]:
+                            continue
+                    if difficulty != [None, None]:
+                        self.game.last_deduced[0] = None
+                        if (
+                            self.game.mode == ULTIMATE and not(
+                                self.game.ultimate_mode & ULTIMATE_R
+                            )
+                        ):
+                            self.game.drop_r = True
+                            if not self.game.deduced():
+                                self.game.drop_r = False
+                        else:
+                            self.game.drop_r = False
+                            self.game.deduced()
                 break
             if mask_board is None:
+                self.board = None
                 raise ValueError(f"共尝试{__count}次, 均未生成成功")
 
         else:
@@ -313,7 +353,7 @@ class Model():
                         obj.code() == board[pos].code() and
                         obj.high_light(_board) == board[pos].high_light(board) and
                         obj.invalid(_board) == board[pos].invalid(board) and
-                        obj.web_component == board[pos].web_component
+                        obj.web_component(_board) == board[pos].web_component(_board)
                     ):
                         continue
 
@@ -395,7 +435,7 @@ class Model():
             print("[hint]", hint[0], "->", hint[1])
         # return {}, 200  # 格式和click返回应一样
         hint_list = hint_list.items()
-        min_length = min(len(tup[0]) for tup in hint_list)
+        min_length = min(len(tup[0]) if ("R", None) not in tup[0] else 1 + (len(tup[0]) // 4) for tup in hint_list)
         print("[hint]", min_length)
         # 步骤2: 收集所有第一个列表长度等于最小长度的二元组
         hint_list = [tup for tup in hint_list if len(tup[0]) == min_length]
@@ -511,8 +551,7 @@ class Model():
             ]
         return { "rules": rules_info }
 
-    def reset(self, args, json):
-
+    def reset(self, args=None, json=None):
         game: Game = self.game
         mask_board = self.board.clone()
         print("[reset] reset start")
@@ -534,6 +573,23 @@ class Model():
                 game.drop_r = True
         print("rest end")
         return '', 200
+
+    def serialize(self):
+        if self.game is None:
+            raise RuntimeError("游戏未初始化")
+        game: Game = self.game
+        return {
+            "game": game.serialize(),
+            "rules": self.rules,
+        }
+
+    @classmethod
+    def from_dict(cls, data):
+        self = cls()
+        self.game = Game.from_dict(data["game"])
+        self.rules = data["rules"]
+        self.board = self.game.board
+        return self
 
     def serialize(self):
         if self.game is None:
