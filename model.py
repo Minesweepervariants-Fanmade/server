@@ -438,7 +438,14 @@ class Model():
         min_length = min(len(tup[0]) if ("R", None) not in tup[0] else 1 + (len(tup[0]) // 4) for tup in hint_list)
         print("[hint]", min_length)
         # 步骤2: 收集所有第一个列表长度等于最小长度的二元组
-        hint_list = [tup for tup in hint_list if len(tup[0]) == min_length]
+        hint_list = [
+            tup for tup in hint_list
+            if (
+               len(tup[0])
+               if ("R", None) not in tup[0]
+               else 1 + (len(tup[0]) // 4)
+            ) == min_length
+        ]
 
         if hint_list[0][1]:
             hint_list = [([], game.deduced())] + hint_list
