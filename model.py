@@ -288,16 +288,17 @@ class Model():
         game: Game = self.get_game()
 
         board = game.board.clone()
-        pos = board.get_pos(data["x"], data["y"], data["boardName"])
 
         print("[click] start click")
         t = time.time()
 
         if data["button"] == "left":
+            pos = board.get_pos(data["x"], data["y"], data["boardName"])
             _board = game.click(pos)
         elif data["button"] == "right":
+            pos = board.get_pos(data["x"], data["y"], data["boardName"])
             _board = game.mark(pos)
-        elif data["button"] == "Space":
+        elif data["button"] == "space":
             count = self.get_count()
             refresh = {
                 "gameover": False,
@@ -316,6 +317,7 @@ class Model():
                 refresh["count"] = self.get_count()
             return refresh
         else:
+            raise ValueError(f"未知的按钮: {data['button']}")
             _board = None
         print(f"[click] end click used time:{time.time() - t}s")
         game.thread_hint()
