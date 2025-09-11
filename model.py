@@ -169,7 +169,10 @@ class Model():
                 ):
                     # 线索数检查
                     self.game.drop_r = True
-                    clue_freq = self.game.check_difficulty()
+                    clue_freq = self.game.check_difficulty(diff=difficulty)
+                    if clue_freq is None:
+                        get_random(new=True)
+                        continue
                     print("[new] clue map: ", clue_freq)
                     max_clue = max(clue_freq.keys())
                     if difficulty[1] is not None:
