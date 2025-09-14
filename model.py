@@ -58,7 +58,7 @@ class Model():
             "total": len([_ for pos, _ in a_board("F")]),
             "known": None if game.drop_r else len([_ for pos, _ in a_board("F")]),
             "unknown": len([_ for _ in board("N")]),
-            "remains": None if game.drop_r else len([_ for pos, _ in a_board("F") if board.get_type(pos) == "N"])
+            "remains": None if game.drop_r else len([_ for pos, _ in a_board("F") if board.get_type(pos, special='raw') == "N"])
         }
         return count
 
@@ -259,12 +259,12 @@ class Model():
             board_data["u_hint"] = {
                 "flagcount": len([
                     None for _pos in deduced if (
-                        game.answer_board.get_type(_pos) == "F" and
+                        game.answer_board.get_type(_pos, special='raw') == "F" and
                         _pos.board_key in game.answer_board.get_interactive_keys()
                     )]),
                 "emptycount": len([
                     None for _pos in deduced if (
-                        game.answer_board.get_type(_pos) == "C" and
+                        game.answer_board.get_type(_pos, special='raw') == "C" and
                         _pos.board_key in game.answer_board.get_interactive_keys()
                     )])
             }
@@ -409,12 +409,12 @@ class Model():
             refresh["u_hint"] = {
                 "flagcount": len([
                     None for _pos in deduced if (
-                        game.answer_board.get_type(_pos) == "F" and
+                        game.answer_board.get_type(_pos, special='raw') == "F" and
                         _pos.board_key in game.answer_board.get_interactive_keys()
                     )]),
                 "emptycount": len([
                     None for _pos in deduced if (
-                        game.answer_board.get_type(_pos) == "C" and
+                        game.answer_board.get_type(_pos, special='raw') == "C" and
                         _pos.board_key in game.answer_board.get_interactive_keys()
                     )]),
             }

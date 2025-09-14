@@ -81,7 +81,7 @@ def init_component(data: dict, *, color: str = '--foreground-color', invalid: bo
 
 def format_cell(_board, pos, label):
     obj = _board[pos]
-    color = "--flag-color" if _board.get_type(pos) == "F" else "--foreground-color"
+    color = "--flag-color" if _board.get_type(pos, special='raw') == "F" else "--foreground-color"
     invalid = False if obj is None else obj.invalid(_board)
     cell_data = init_component(
         obj.web_component(_board),
@@ -92,8 +92,8 @@ def format_cell(_board, pos, label):
     if (
         _board.get_config(pos.board_key, "pos_label") and
         (
-            _board.get_type(pos) == "F" or
-            _board.get_type(pos) == "N"
+            _board.get_type(pos, special='raw') == "F" or
+            _board.get_type(pos, special='raw') == "N"
         )
     ):
         cell_data = {
