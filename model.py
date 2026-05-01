@@ -540,13 +540,21 @@ class Model():
         all_rules = get_all_rules()
         rules_info = {}
         for key in ["L", "M", "R"]:
-            for name in all_rules[key]:
-                unascii_name = [n for n in all_rules[key][name]["names"] if not n.isascii()]
-                zh_name = unascii_name[0] if unascii_name else ""
-                rules_info[name] = [
+            for rule_info in all_rules.get(key, []):
+                name_map = rule_info.get("name", {}) if isinstance(rule_info, dict) else {}
+                name_values = list(name_map.values()) if isinstance(name_map, dict) else []
+                unascii_name = [n for n in name_values if isinstance(n, str) and not n.isascii()]
+                zh_name = unascii_name[0] if unascii_name else (name_values[0] if name_values else "")
+                rule_name = rule_info.get("id", zh_name) if isinstance(rule_info, dict) else zh_name
+                doc_map = rule_info.get("doc", {}) if isinstance(rule_info, dict) else {}
+                if isinstance(doc_map, dict):
+                    doc_text = doc_map.get("default", "") or (next(iter(doc_map.values()), "") if doc_map else "")
+                else:
+                    doc_text = ""
+                rules_info[rule_name] = [
                     key.lower() + "Rule",
                     zh_name,
-                    all_rules[key][name]["doc"]
+                    doc_text
                 ]
 
         for name, (fullname, doc) in get_all_dye().items():
@@ -585,23 +593,6 @@ class Model():
                 game.drop_r = True
         print("rest end")
         return '', 200
-
-    def serialize(self):
-        if self.game is None:
-            raise RuntimeError("游戏未初始化")
-        game: Game = self.game
-        return {
-            "game": game.serialize(),
-            "rules": self.rules,
-        }
-
-    @classmethod
-    def from_dict(cls, data):
-        self = cls()
-        self.game = Game.from_dict(data["game"])
-        self.rules = data["rules"]
-        self.board = self.game.board
-        return self
 
     def serialize(self):
         if self.game is None:
