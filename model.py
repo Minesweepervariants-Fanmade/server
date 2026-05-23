@@ -147,6 +147,8 @@ class Model():
             __t = time.time()
             __count = 0
             while True:
+                if time.time() > __t + 60:
+                    break
                 __count += 1
                 answer_board = self.summon.summon_board()
                 if answer_board is None:
