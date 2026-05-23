@@ -341,7 +341,7 @@ class Model():
             self.noFail = False
             print("[click] *unbelievable*", unbelievable)
             mines: list[CellType] = [
-                {"x": _pos.x, "y": _pos.y,
+                {"x": _pos.row, "y": _pos.col,
                  "boardname": _pos.board_key}
                 for _pos in unbelievable
             ]
