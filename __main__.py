@@ -41,7 +41,7 @@ async def main():
     app = create_app(sm, _Model)
 
     tool.LOGGER = None
-    tool.get_logger(log_lv="DEBUG")
+    tool.get_logger(log_lv="TRACE")
     port = int(sys.argv[1] if len(sys.argv) == 2 else "5050")
     host = "0.0.0.0"
 

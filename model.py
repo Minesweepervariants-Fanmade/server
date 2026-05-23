@@ -485,8 +485,8 @@ class Model():
                             print("[hint] Error:", traceback.format_exc())
                 elif isinstance(b, AbstractPosition):
                     b_hint.append({
-                        "x": b.x,
-                        "y": b.y,
+                        "x": b.row,
+                        "y": b.col,
                         "boardname": b.board_key,
                     })
             for b in b_hint:
@@ -497,8 +497,8 @@ class Model():
                 b["info"] += ")"
             for t in _t_hint:
                 t_hint.append({
-                    "x": t.x,
-                    "y": t.y,
+                    "x": t.row,
+                    "y": t.col,
                     "boardname": t.board_key,
                 })
             results.append({

@@ -118,27 +118,17 @@ def format_cell(_board, pos, label):
         overlayText = ""
     else:
         overlayText = obj.tag(_board).decode()
-    # hightlight = [{
-    #             "x": pos.x,
-    #             "y": pos.y,
-    #             "boardname": pos.board_key,
-    #         }]
-    hightlight = {pos.board_key: [[pos.x, pos.y]]}
+    hightlight = {pos.board_key: [[pos.row, pos.col]]}
     if obj is not None:
         if obj.high_light(_board) is not None:
             for h_pos in set(h_pos for h_pos in obj.high_light(_board) if _board.in_bounds(h_pos)):
-                # hightlight.append({
-                #     "x": h_pos.x,
-                #     "y": h_pos.y,
-                #     "boardname": h_pos.board_key,
-                # })
                 if h_pos.board_key not in hightlight:
                     hightlight[h_pos.board_key] = []
-                hightlight[h_pos.board_key].append([h_pos.x, h_pos.y])
+                hightlight[h_pos.board_key].append([h_pos.row, h_pos.col])
     cell_data = {
         "type": "" if obj is None else obj.type().decode("ascii"),
         "position": {
-            "x": pos.x, "y": pos.y,
+            "x": pos.row, "y": pos.col,
             "boardname": pos.board_key
         },
         "component": cell_data,
@@ -174,7 +164,10 @@ def format_board(_board: AbstractBoard):
             )
         ]
         boards[key] = {
-            "size": _board.get_config(key, "size"),
+            "size": (
+                _board.get_config(key, "size")[1],
+                _board.get_config(key, "size")[0]
+            ),
             "position": [_board.get_board_keys().index(key), 0],
             "showLabel": _board.get_config(key, "row_col"),
             "showName": not _board.get_config(key, "row_col"),
@@ -193,7 +186,7 @@ def format_board(_board: AbstractBoard):
                     cells.append({
                         "type": "",
                         "position": {
-                            "x": pos.x, "y": pos.y,
+                            "x": pos.row, "y": pos.col,
                             "boardname": pos.board_key
                         },
                         "component": {
