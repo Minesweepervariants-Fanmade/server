@@ -117,7 +117,7 @@ def format_cell(_board, pos, label):
     if obj in [VALUE, MINES, None]:
         overlayText = ""
     else:
-        overlayText = obj.tag(_board).decode()
+        overlayText = obj.tag(_board)
     hightlight = {pos.board_key: [[pos.row, pos.col]]}
     if obj is not None:
         if obj.high_light(_board) is not None:
@@ -126,7 +126,7 @@ def format_cell(_board, pos, label):
                     hightlight[h_pos.board_key] = []
                 hightlight[h_pos.board_key].append([h_pos.row, h_pos.col])
     cell_data = {
-        "type": "" if obj is None else obj.type().decode("ascii"),
+        "type": "" if obj is None else obj.tag(board=_board),
         "position": {
             "x": pos.row, "y": pos.col,
             "boardname": pos.board_key
