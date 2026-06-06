@@ -6,7 +6,7 @@ import traceback
 from flask import Request
 
 import minesweepervariants
-from minesweepervariants.abs.board import AbstractBoard, AbstractPosition
+from minesweepervariants.board import Board, Position
 from minesweepervariants.impl.rule.Rrule.Quess import RuleQuess
 from minesweepervariants.impl.rule.Mrule.F import AbstractRule0F
 from minesweepervariants.impl.summon.game import GameSession as Game, Mode, UMode, ValueAsterisk, MinesAsterisk
@@ -32,7 +32,7 @@ class Model():
     game: Game | None
     rules: list[str]
     summon: Summon | None
-    board: AbstractBoard | None
+    board: Board | None
     noHint: bool
     noFail: bool
 
@@ -485,7 +485,7 @@ class Model():
                             })
                         except Exception as e:
                             print("[hint] Error:", traceback.format_exc())
-                elif isinstance(b, AbstractPosition):
+                elif isinstance(b, Position):
                     b_hint.append({
                         "x": b.row,
                         "y": b.col,

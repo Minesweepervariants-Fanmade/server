@@ -1,4 +1,4 @@
-from minesweepervariants.abs.board import AbstractBoard
+from minesweepervariants.board import Board
 from minesweepervariants.abs.rule import AbstractValue
 from minesweepervariants.impl.summon.game import Mode, UMode, ValueAsterisk, MinesAsterisk
 from minesweepervariants.utils.impl_obj import VALUE_QUESS, MINES_TAG
@@ -142,7 +142,7 @@ def format_cell(_board, pos, label):
     return cell_data
 
 
-def format_board(_board: AbstractBoard):
+def format_board(_board: Board):
     if _board is None:
         return
 
