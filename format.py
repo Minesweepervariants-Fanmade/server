@@ -180,7 +180,7 @@ def format_board(_board: Board):
             boards[key].update({
                 "dye": dye_list,
             })
-        for pos, obj in _board(key=key):
+        for pos, obj in _board(key=key, mode="obj"):
             if obj is None:
                 if _board.get_config(key, "pos_label"):
                     cells.append({
