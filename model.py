@@ -78,6 +78,8 @@ class Model():
         dye = args.get("dye") or ""
         mask = args.get("mask") or ""
         seed = args.get("seed") or None
+        # ratio = args.get("ratio") or 0.3
+        ratio = 0.3
         difficulty = args.get("diff") or "*,*"  # "*"表示不做限制 ","分割
 
         parts = difficulty.split(',')
@@ -155,7 +157,7 @@ class Model():
                     get_random(new=True)
                     continue
                 self.game.answer_board = answer_board
-                mask_board = self.game.create_board()
+                mask_board = self.game.create_board(ratio)
                 if mask_board is None:
                     get_random(new=True)
                     continue
