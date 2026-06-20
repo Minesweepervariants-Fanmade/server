@@ -79,7 +79,7 @@ class Model():
         mask = args.get("mask") or ""
         seed = args.get("seed") or None
         # ratio = args.get("ratio") or 0.3
-        ratio = 0.3
+        ratio = 0.1
         difficulty = args.get("diff") or "*,*"  # "*"表示不做限制 ","分割
 
         parts = difficulty.split(',')
@@ -124,11 +124,12 @@ class Model():
         summon = Summon(
             size=size,
             total=total,
-            rules=rules,
+            rules=rules[:],
             drop_r=not used_r,
             mask=mask,
             dye=dye
         )
+        rules = [rule for rule, _ in summon.raw_rules]
 
         self.summon = summon
 
