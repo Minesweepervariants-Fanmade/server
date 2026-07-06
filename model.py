@@ -78,8 +78,7 @@ class Model():
         dye = args.get("dye") or ""
         mask = args.get("mask") or ""
         seed = args.get("seed") or None
-        # ratio = args.get("ratio") or 0.3
-        ratio = 0.1
+        ratio = float(args.get("ratio") or "0.3")
         difficulty = args.get("diff") or "*,*"  # "*"表示不做限制 ","分割
 
         parts = difficulty.split(',')

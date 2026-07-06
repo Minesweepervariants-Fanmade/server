@@ -106,6 +106,7 @@ class CreateGameParams(TypedDict):
     dye: NotRequired[str]
     mask: NotRequired[str]
     seed: NotRequired[str]
+    ratio: NotRequired[str]
 
 
 class ClickData(TypedDict):
