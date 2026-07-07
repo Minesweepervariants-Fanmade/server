@@ -149,7 +149,7 @@ class Model():
             __t = time.time()
             __count = 0
             while True:
-                if time.time() > __t + 5:
+                if time.time() > __t + 60:
                     break
                 __count += 1
                 answer_board = self.summon.summon_board()
@@ -449,11 +449,7 @@ class Model():
         # 步骤2: 收集所有第一个列表长度等于最小长度的二元组
         hint_list = [
             tup for tup in hint_list
-            if (
-               len(tup[0])
-               if ("R", None) not in tup[0]
-               else 1 + (len(tup[0]) // 4)
-            ) == min_length
+            if len(tup[0]) == min_length
         ]
 
         if hint_list[0][1]:
