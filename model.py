@@ -174,6 +174,7 @@ class Model():
                     # 线索数检查
                     self.game.drop_r = True
                     clue_freq = self.game.check_difficulty(diff=difficulty)
+                    self.game.last_deduced = [None, []]
                     if clue_freq is None:
                         get_random(new=True)
                         continue
